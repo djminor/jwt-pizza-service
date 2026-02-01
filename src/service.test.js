@@ -1,3 +1,7 @@
+jest.mock('./version.json', () => ({
+  version: '1.2.3-test'
+}));
+
 const request = require('supertest');
 const app = require('./service.js');
 
@@ -19,4 +23,14 @@ test('login', async () => {
   //eslint-disable-next-line no-unused-vars
   const { password, ...user } = { ...testUser, roles: [{ role: 'diner' }] };
   expect(loginRes.body.user).toMatchObject(user);
+});
+test('service returns error for unknown endpoint', async () => {
+  const res = await request(app).get('/unknown-endpoint');
+  expect(res.status).toBe(404);
+  expect(res.body).toMatchObject({ message: 'unknown endpoint' });
+});
+test('service root endpoint', async () => {
+  const res = await request(app).get('/');
+  expect(res.status).toBe(200);
+  expect(res.body).toMatchObject({ message: 'welcome to JWT Pizza', version: '1.2.3-test' });
 });
