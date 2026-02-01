@@ -34,3 +34,13 @@ test('service root endpoint', async () => {
   expect(res.status).toBe(200);
   expect(res.body).toMatchObject({ message: 'welcome to JWT Pizza', version: '1.2.3-test' });
 });
+test('service docs endpoint', async () => {
+  const res = await request(app).get('/api/docs');
+  expect(res.status).toBe(200);
+  expect(res.body).toHaveProperty('version', '1.2.3-test');
+  expect(res.body).toHaveProperty('endpoints');
+  expect(Array.isArray(res.body.endpoints)).toBe(true);
+  expect(res.body).toHaveProperty('config');
+  expect(res.body.config).toHaveProperty('factory');
+  expect(res.body.config).toHaveProperty('db');
+});
