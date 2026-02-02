@@ -214,6 +214,9 @@ test('getTokenSignature', () => {
     expect(DB.getTokenSignature('a.b.c')).toBe('c');
     expect(DB.getTokenSignature('bad')).toBe('');
 });
+test('getOffset', () => {
+    expect(DB.getOffset(2, 5)).toBe(5);
+});
 
 
 
