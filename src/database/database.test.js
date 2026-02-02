@@ -221,5 +221,10 @@ test('getID throws', async () => {
     executeMock.mockResolvedValueOnce([[]]);
     await expect(DB.getID(connectionMock, 'id', 1, 'menu')).rejects.toThrow();
 });
-
+test('getUser wrong password', async () => {
+    executeMock.mockResolvedValueOnce([[{ id: 1, password: 'hashed' }]]);
+    bcrypt.compare.mockResolvedValueOnce(false);
+  
+    await expect(DB.getUser('e', 'bad')).rejects.toThrow();
+});
 
