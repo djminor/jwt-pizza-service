@@ -115,3 +115,17 @@ test('addUser default role', async () => {
   
     expect(bcrypt.hash).toHaveBeenCalled();
 });
+  
+test('addUser franchisee role branch', async () => {
+    executeMock
+      .mockResolvedValueOnce([{ insertId: 1 }])
+      .mockResolvedValueOnce([[{ id: 9 }]]) // getID
+      .mockResolvedValue([]);
+  
+    await DB.addUser({
+      name: 'n',
+      email: 'e',
+      password: 'p',
+      roles: [{ role: 'franchisee', object: 'F' }],
+    });
+});
