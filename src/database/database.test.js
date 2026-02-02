@@ -231,3 +231,7 @@ test('updateUser no changes', async () => {
     executeMock.mockResolvedValue([[{ id: 1, password: 'hashed' }]]);
     await DB.updateUser(1);
 });
+test('updateUser all fields', async () => {
+    executeMock.mockResolvedValue([[{ id: 1, password: 'hashed' }]]);
+    await DB.updateUser(1, 'n', 'e', 'p');
+});
