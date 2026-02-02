@@ -142,4 +142,8 @@ test('getUser success', async () => {
 test('getUser failure', async () => {
     executeMock.mockResolvedValueOnce([[]]);
     await expect(DB.getUser('x')).rejects.toThrow();
+}); 
+test('loginUser', async () => {
+    await DB.loginUser(1, 'a.b.c');
+    expect(executeMock).toHaveBeenCalled();
 });
