@@ -96,4 +96,8 @@ test('getMenu', async () => {
     const rows = await DB.getMenu();
     expect(rows[0].id).toBe(1);
 });
-  
+test('addMenuItem', async () => {
+    executeMock.mockResolvedValueOnce([{ insertId: 7 }]);
+    const r = await DB.addMenuItem({ title: 't', description: 'd', image: 'i', price: 3 });
+    expect(r.id).toBe(7);
+});
