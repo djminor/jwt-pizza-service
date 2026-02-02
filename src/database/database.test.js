@@ -101,3 +101,17 @@ test('addMenuItem', async () => {
     const r = await DB.addMenuItem({ title: 't', description: 'd', image: 'i', price: 3 });
     expect(r.id).toBe(7);
 });
+test('addUser default role', async () => {
+    executeMock
+      .mockResolvedValueOnce([{ insertId: 2 }]) // user insert
+      .mockResolvedValue([{ insertId: 3 }]);
+  
+    await DB.addUser({
+      name: 'n',
+      email: 'e',
+      password: 'p',
+      roles: [{ role: 'diner' }],
+    });
+  
+    expect(bcrypt.hash).toHaveBeenCalled();
+});
