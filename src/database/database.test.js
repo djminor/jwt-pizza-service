@@ -151,3 +151,7 @@ test('isLoggedIn true', async () => {
     executeMock.mockResolvedValueOnce([[{ userId: 1 }]]);
     expect(await DB.isLoggedIn('a.b.c')).toBe(true);
 });
+test('logoutUser', async () => {
+    await DB.logoutUser('a.b.c');
+    expect(executeMock).toHaveBeenCalled();
+});
