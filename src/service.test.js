@@ -44,3 +44,9 @@ test('service docs endpoint', async () => {
   expect(res.body.config).toHaveProperty('factory');
   expect(res.body.config).toHaveProperty('db');
 });
+test('service handles errors', async () => {
+  const res = await request(app).get('/api/user/profile');
+  expect(res.status).toBe(404);
+  expect(res.body).toHaveProperty('message');
+  expect(typeof res.body.message).toBe('string');
+});
