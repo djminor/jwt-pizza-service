@@ -242,4 +242,7 @@ test('getFranchises admin path', async () => {
   
     await DB.getFranchises(adminUser);
 });
-  
+test('getFranchises more flag', async () => {
+    executeMock.mockResolvedValueOnce([[{id:1},{id:2},{id:3}]]);
+    await DB.getFranchises(null, 0, 2);
+});  
