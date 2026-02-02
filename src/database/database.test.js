@@ -227,4 +227,7 @@ test('getUser wrong password', async () => {
   
     await expect(DB.getUser('e', 'bad')).rejects.toThrow();
 });
-
+test('updateUser no changes', async () => {
+    executeMock.mockResolvedValue([[{ id: 1, password: 'hashed' }]]);
+    await DB.updateUser(1);
+});
