@@ -162,3 +162,16 @@ test('getOrders loops items', async () => {
     const r = await DB.getOrders({ id: 5 });
     expect(r.orders[0].items.length).toBe(1);
 });
+test('addDinerOrder', async () => {
+    executeMock
+      .mockResolvedValueOnce([{ insertId: 3 }])
+      .mockResolvedValueOnce([[{ id: 2 }]])
+      .mockResolvedValue([]);
+  
+    const r = await DB.addDinerOrder(
+      { id: 1 },
+      { franchiseId: 2, storeId: 3, items: [{ menuId: 2, description: 'x', price: 1 }] }
+    );
+  
+    expect(r.id).toBe(3);
+});
