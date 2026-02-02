@@ -188,3 +188,10 @@ test('createFranchise success', async () => {
   
     expect(f.id).toBe(9);
 });
+test('createFranchise missing admin', async () => {
+    executeMock.mockResolvedValueOnce([[]]);
+  
+    await expect(
+      DB.createFranchise({ name: 'F', admins: [{ email: 'e' }] })
+    ).rejects.toThrow();
+});
