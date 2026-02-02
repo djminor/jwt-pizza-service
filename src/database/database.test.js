@@ -175,3 +175,16 @@ test('addDinerOrder', async () => {
   
     expect(r.id).toBe(3);
 });
+test('createFranchise success', async () => {
+    executeMock
+      .mockResolvedValueOnce([[{ id: 1, name: 'n' }]])
+      .mockResolvedValueOnce([{ insertId: 9 }])
+      .mockResolvedValue([]);
+  
+    const f = await DB.createFranchise({
+      name: 'F',
+      admins: [{ email: 'e' }],
+    });
+  
+    expect(f.id).toBe(9);
+});
