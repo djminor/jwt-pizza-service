@@ -90,6 +90,10 @@ test('initializeDatabase handles error', async () => {
     jest.isolateModules(() => {
       require('./database.js');
     });
-  });
+});
+test('getMenu', async () => {
+    executeMock.mockResolvedValueOnce([[{ id: 1 }]]);
+    const rows = await DB.getMenu();
+    expect(rows[0].id).toBe(1);
+});
   
- 
