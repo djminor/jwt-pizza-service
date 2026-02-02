@@ -206,3 +206,8 @@ test('createStore', async () => {
     const s = await DB.createStore(1, { name: 'S' });
     expect(s.id).toBe(5);
 });
+test('deleteStore', async () => {
+    await DB.deleteStore(1, 2);
+    expect(executeMock).toHaveBeenCalled();
+});
+
