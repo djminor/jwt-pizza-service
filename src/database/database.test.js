@@ -84,4 +84,12 @@ test('initializeDatabase creates schema + tables', async () => {
   expect(queryMock).toHaveBeenCalledWith('CREATE TABLE x(id int)');
   expect(connectionMock.end).toHaveBeenCalled();
 });
-
+test('initializeDatabase handles error', async () => {
+    mysql.createConnection.mockRejectedValueOnce(new Error('boom'));
+  
+    jest.isolateModules(() => {
+      require('./database.js');
+    });
+  });
+  
+ 
