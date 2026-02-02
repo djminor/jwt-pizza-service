@@ -129,3 +129,17 @@ test('addUser franchisee role branch', async () => {
       roles: [{ role: 'franchisee', object: 'F' }],
     });
 });
+  
+test('getUser success', async () => {
+    executeMock
+      .mockResolvedValueOnce([[{ id: 1, password: 'hashed' }]])
+      .mockResolvedValueOnce([[{ role: 'admin', objectId: 0 }]]);
+  
+    const u = await DB.getUser('e', 'pw');
+    expect(u.id).toBe(1);
+    expect(u.password).toBeUndefined();
+  });
+test('getUser failure', async () => {
+    executeMock.mockResolvedValueOnce([[]]);
+    await expect(DB.getUser('x')).rejects.toThrow();
+});
