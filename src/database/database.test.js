@@ -235,3 +235,11 @@ test('updateUser all fields', async () => {
     executeMock.mockResolvedValue([[{ id: 1, password: 'hashed' }]]);
     await DB.updateUser(1, 'n', 'e', 'p');
 });
+test('getFranchises admin path', async () => {
+    executeMock.mockResolvedValueOnce([[{ id: 1, name: 'F' }]]);
+  
+    const adminUser = { isRole: () => true };
+  
+    await DB.getFranchises(adminUser);
+});
+  
