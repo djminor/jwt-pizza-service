@@ -129,7 +129,6 @@ test('addUser franchisee role branch', async () => {
       roles: [{ role: 'franchisee', object: 'F' }],
     });
 });
-  
 test('getUser success', async () => {
     executeMock
       .mockResolvedValueOnce([[{ id: 1, password: 'hashed' }]])
@@ -138,7 +137,7 @@ test('getUser success', async () => {
     const u = await DB.getUser('e', 'pw');
     expect(u.id).toBe(1);
     expect(u.password).toBeUndefined();
-  });
+});
 test('getUser failure', async () => {
     executeMock.mockResolvedValueOnce([[]]);
     await expect(DB.getUser('x')).rejects.toThrow();
@@ -154,4 +153,12 @@ test('isLoggedIn true', async () => {
 test('logoutUser', async () => {
     await DB.logoutUser('a.b.c');
     expect(executeMock).toHaveBeenCalled();
+});
+test('getOrders loops items', async () => {
+    executeMock
+      .mockResolvedValueOnce([[{ id: 1 }]])
+      .mockResolvedValueOnce([[{ id: 10 }]]);
+  
+    const r = await DB.getOrders({ id: 5 });
+    expect(r.orders[0].items.length).toBe(1);
 });
