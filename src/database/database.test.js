@@ -209,5 +209,11 @@ test('createStore', async () => {
 test('deleteStore', async () => {
     await DB.deleteStore(1, 2);
     expect(executeMock).toHaveBeenCalled();
+}); 
+test('getTokenSignature', () => {
+    expect(DB.getTokenSignature('a.b.c')).toBe('c');
+    expect(DB.getTokenSignature('bad')).toBe('');
 });
+
+
 
