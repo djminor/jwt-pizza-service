@@ -195,3 +195,9 @@ test('createFranchise missing admin', async () => {
       DB.createFranchise({ name: 'F', admins: [{ email: 'e' }] })
     ).rejects.toThrow();
 });
+test('deleteFranchise rollback branch', async () => {
+    executeMock.mockRejectedValueOnce(new Error());
+  
+    await expect(DB.deleteFranchise(1)).rejects.toThrow();
+    expect(connectionMock.rollback).toHaveBeenCalled();
+});
