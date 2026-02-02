@@ -201,3 +201,8 @@ test('deleteFranchise rollback branch', async () => {
     await expect(DB.deleteFranchise(1)).rejects.toThrow();
     expect(connectionMock.rollback).toHaveBeenCalled();
 });
+test('createStore', async () => {
+    executeMock.mockResolvedValueOnce([{ insertId: 5 }]);
+    const s = await DB.createStore(1, { name: 'S' });
+    expect(s.id).toBe(5);
+});
