@@ -217,6 +217,9 @@ test('getTokenSignature', () => {
 test('getOffset', () => {
     expect(DB.getOffset(2, 5)).toBe(5);
 });
-
+test('getID throws', async () => {
+    executeMock.mockResolvedValueOnce([[]]);
+    await expect(DB.getID(connectionMock, 'id', 1, 'menu')).rejects.toThrow();
+});
 
 
