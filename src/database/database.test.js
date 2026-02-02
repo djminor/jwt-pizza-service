@@ -146,4 +146,8 @@ test('getUser failure', async () => {
 test('loginUser', async () => {
     await DB.loginUser(1, 'a.b.c');
     expect(executeMock).toHaveBeenCalled();
+}); 
+test('isLoggedIn true', async () => {
+    executeMock.mockResolvedValueOnce([[{ userId: 1 }]]);
+    expect(await DB.isLoggedIn('a.b.c')).toBe(true);
 });
