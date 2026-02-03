@@ -116,5 +116,35 @@ test('GET /api/order returns user orders', async () => {
     expect(res.body.orders).toHaveLength(1);
     expect(DB.getOrders).toHaveBeenCalledWith(expect.any(Object), '2');
 });
+test('POST /api/order creates order and returns factory jwt', async () => {
+    DB.addDinerOrder.mockResolvedValue({ id: 10 });
+  
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        reportUrl: 'http://report',
+        jwt: 'factory-jwt',
+      }),
+    });
+  
+    const res = await request(makeApp())
+      .post('/api/order')
+      .send({ franchiseId: 1, storeId: 1, items: [] });
+  
+    expect(res.status).toBe(200);
+    expect(res.body.order.id).toBe(10);
+    expect(res.body.jwt).toBe('factory-jwt');
+  
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/order'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          authorization: expect.stringContaining('factory-key'),
+        }),
+      })
+    );
+});
+  
   
   
