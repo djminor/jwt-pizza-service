@@ -246,3 +246,9 @@ test('getFranchises more flag', async () => {
     executeMock.mockResolvedValueOnce([[{id:1},{id:2},{id:3}]]);
     await DB.getFranchises(null, 0, 2);
 });  
+test('getUserFranchises empty', async () => {
+    executeMock.mockResolvedValueOnce([[]]);
+    const r = await DB.getUserFranchises(1);
+    expect(r).toEqual([]);
+});
+  
