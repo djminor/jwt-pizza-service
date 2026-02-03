@@ -66,7 +66,6 @@ beforeEach(() => {
     setAuth = mod.setAuth;
   });
 });
-
 test('POST /api/auth success', async () => {
   DB.addUser.mockResolvedValue({ id: 2, name: 'n', email: 'e', roles: [{ role: Role.Diner }] });
 
@@ -81,3 +80,12 @@ test('POST /api/auth success', async () => {
   expect(jwt.sign).toHaveBeenCalled();
   expect(DB.loginUser).toHaveBeenCalledWith(2, 'signed.token.sig');
 });
+test('POST /api/auth missing fields → 400', async () => {
+    const app = makeApp();
+  
+    const res = await request(app)
+      .post('/api/auth')
+      .send({ email: 'e' });
+  
+    expect(res.status).toBe(400);
+});  
