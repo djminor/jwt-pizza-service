@@ -134,5 +134,12 @@ test('setAuthUser sets req.user when valid', async () => {
     expect(req.user).toBeTruthy();
     expect(req.user.isRole('admin')).toBe(true);
     expect(next).toHaveBeenCalled();
+});  
+test('setAuthUser when DB says not logged in', async () => {
+    DB.isLoggedIn.mockResolvedValue(false);
+  
+    const req = { headers: { authorization: 'Bearer t' } };
+    await setAuthUser(req, {}, jest.fn());
+  
+    expect(req.user).toBeUndefined();
 });
- 
