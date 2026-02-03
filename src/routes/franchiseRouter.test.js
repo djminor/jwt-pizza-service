@@ -133,5 +133,16 @@ test('POST /api/franchise rejects non-admin', async () => {
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/unable to create/);
 });
+test('DELETE /api/franchise/:id deletes franchise', async () => {
+    DB.deleteFranchise.mockResolvedValue();
+  
+    const res = await request(makeApp())
+      .delete('/api/franchise/4');
+  
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch(/deleted/);
+    expect(DB.deleteFranchise).toHaveBeenCalledWith(4);
+});
+  
   
   
