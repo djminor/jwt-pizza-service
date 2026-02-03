@@ -106,4 +106,15 @@ test('PUT /api/order/menu rejects non-admin', async () => {
     expect(res.status).toBe(403);
     expect(res.body.error).toMatch(/unable to add menu item/);
 });
+test('GET /api/order returns user orders', async () => {
+    DB.getOrders.mockResolvedValue({ orders: [{ id: 5 }], page: 1 });
+  
+    const res = await request(makeApp())
+      .get('/api/order?page=2');
+  
+    expect(res.status).toBe(200);
+    expect(res.body.orders).toHaveLength(1);
+    expect(DB.getOrders).toHaveBeenCalledWith(expect.any(Object), '2');
+});
+  
   
