@@ -143,6 +143,17 @@ test('DELETE /api/franchise/:id deletes franchise', async () => {
     expect(res.body.message).toMatch(/deleted/);
     expect(DB.deleteFranchise).toHaveBeenCalledWith(4);
 });
+test('POST store allowed for admin', async () => {
+    DB.getFranchise.mockResolvedValue({ id: 7, admins: [] });
+    DB.createStore.mockResolvedValue({ id: 10 });
+  
+    const res = await request(makeApp())
+      .post('/api/franchise/7/store')
+      .send({ name: 'SLC' });
+  
+    expect(res.status).toBe(200);
+    expect(DB.createStore).toHaveBeenCalledWith(7, { name: 'SLC' });
+});
   
   
   
