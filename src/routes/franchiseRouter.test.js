@@ -154,6 +154,25 @@ test('POST store allowed for admin', async () => {
     expect(res.status).toBe(200);
     expect(DB.createStore).toHaveBeenCalledWith(7, { name: 'SLC' });
 });
+test('POST store allowed for franchise admin', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 22, isRole: () => false };
+      next();
+    });
+  
+    DB.getFranchise.mockResolvedValue({
+      id: 8,
+      admins: [{ id: 22 }],
+    });
+    DB.createStore.mockResolvedValue({ id: 11 });
+  
+    const res = await request(makeApp())
+      .post('/api/franchise/8/store')
+      .send({});
+  
+    expect(res.status).toBe(200);
+});
+  
   
   
   
