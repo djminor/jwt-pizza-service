@@ -201,6 +201,22 @@ test('DELETE store allowed', async () => {
     expect(res.status).toBe(200);
     expect(DB.deleteStore).toHaveBeenCalledWith(4, 6);
 });
+test('DELETE store forbidden', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 2, isRole: () => false };
+      next();
+    });
+  
+    DB.getFranchise.mockResolvedValue({
+      id: 4,
+      admins: [{ id: 9 }],
+    });
+  
+    const res = await request(makeApp())
+      .delete('/api/franchise/4/store/6');
+  
+    expect(res.status).toBe(403);
+});
   
   
   
