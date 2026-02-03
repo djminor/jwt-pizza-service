@@ -83,3 +83,18 @@ test('GET /api/franchise returns franchises list', async () => {
 
   expect(DB.getFranchises).toHaveBeenCalled();
 });
+test('GET /api/franchise/:userId returns data when user matches', async () => {
+    DB.getUserFranchises.mockResolvedValue([{ id: 2 }]);
+  
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 5, isRole: () => false };
+      next();
+    });
+  
+    const res = await request(makeApp()).get('/api/franchise/5');
+  
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(DB.getUserFranchises).toHaveBeenCalledWith(5);
+});
+  
