@@ -81,3 +81,16 @@ test('GET /api/order/menu returns menu', async () => {
   expect(res.body).toHaveLength(1);
   expect(DB.getMenu).toHaveBeenCalled();
 });
+test('PUT /api/order/menu adds item when admin', async () => {
+    DB.getMenu.mockResolvedValue([{ id: 2 }]);
+    DB.addMenuItem.mockResolvedValue();
+  
+    const res = await request(makeApp())
+      .put('/api/order/menu')
+      .send({ title: 'New Pizza' });
+  
+    expect(res.status).toBe(200);
+    expect(DB.addMenuItem).toHaveBeenCalledWith({ title: 'New Pizza' });
+    expect(DB.getMenu).toHaveBeenCalled();
+});
+  
