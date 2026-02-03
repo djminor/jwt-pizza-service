@@ -97,4 +97,17 @@ test('GET /api/franchise/:userId returns data when user matches', async () => {
     expect(res.body).toHaveLength(1);
     expect(DB.getUserFranchises).toHaveBeenCalledWith(5);
 });
+test('GET /api/franchise/:userId returns empty when unauthorized', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 2, isRole: () => false };
+      next();
+    });
+  
+    const res = await request(makeApp()).get('/api/franchise/9');
+  
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+    expect(DB.getUserFranchises).not.toHaveBeenCalled();
+});
+  
   
