@@ -189,6 +189,18 @@ test('POST store forbidden when not admin or franchise admin', async () => {
   
     expect(res.status).toBe(403);
 });
+test('DELETE store allowed', async () => {
+    DB.getFranchise.mockResolvedValue({
+      id: 4,
+      admins: [{ id: 1 }],
+    });
+  
+    const res = await request(makeApp())
+      .delete('/api/franchise/4/store/6');
+  
+    expect(res.status).toBe(200);
+    expect(DB.deleteStore).toHaveBeenCalledWith(4, 6);
+});
   
   
   
