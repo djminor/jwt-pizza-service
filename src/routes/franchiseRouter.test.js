@@ -109,5 +109,16 @@ test('GET /api/franchise/:userId returns empty when unauthorized', async () => {
     expect(res.body).toEqual([]);
     expect(DB.getUserFranchises).not.toHaveBeenCalled();
 });
+test('POST /api/franchise creates franchise for admin', async () => {
+    DB.createFranchise.mockResolvedValue({ id: 3, name: 'newF' });
+  
+    const res = await request(makeApp())
+      .post('/api/franchise')
+      .send({ name: 'newF' });
+  
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe(3);
+    expect(DB.createFranchise).toHaveBeenCalled();
+});
   
   
