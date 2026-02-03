@@ -145,6 +145,24 @@ test('POST /api/order creates order and returns factory jwt', async () => {
       })
     );
 });
+test('POST /api/order handles factory failure', async () => {
+    DB.addDinerOrder.mockResolvedValue({ id: 11 });
+  
+    fetch.mockResolvedValue({
+      ok: false,
+      json: async () => ({
+        reportUrl: 'http://bad-report',
+      }),
+    });
+  
+    const res = await request(makeApp())
+      .post('/api/order')
+      .send({ franchiseId: 1, storeId: 1, items: [] });
+  
+    expect(res.status).toBe(500);
+    expect(res.body.message).toMatch(/Failed to fulfill order/);
+});
+  
   
   
   
