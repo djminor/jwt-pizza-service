@@ -120,5 +120,18 @@ test('POST /api/franchise creates franchise for admin', async () => {
     expect(res.body.id).toBe(3);
     expect(DB.createFranchise).toHaveBeenCalled();
 });
+test('POST /api/franchise rejects non-admin', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 1, isRole: () => false };
+      next();
+    });
+  
+    const res = await request(makeApp())
+      .post('/api/franchise')
+      .send({ name: 'x' });
+  
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/unable to create/);
+});
   
   
