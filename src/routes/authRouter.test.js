@@ -89,3 +89,16 @@ test('POST /api/auth missing fields → 400', async () => {
   
     expect(res.status).toBe(400);
 });  
+test('PUT /api/auth login success', async () => {
+    DB.getUser.mockResolvedValue({ id: 1, name: 'n', roles: [] });
+  
+    const app = makeApp();
+  
+    const res = await request(app)
+      .put('/api/auth')
+      .send({ email: 'e', password: 'p' });
+  
+    expect(res.status).toBe(200);
+    expect(DB.getUser).toHaveBeenCalledWith('e', 'p');
+    expect(DB.loginUser).toHaveBeenCalled();
+});
