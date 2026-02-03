@@ -109,3 +109,16 @@ test('DELETE /api/auth unauthorized', async () => {
   
     expect(res.status).toBe(401);
 });
+  
+test('DELETE /api/auth success', async () => {
+    DB.isLoggedIn.mockResolvedValue(true);
+  
+    const app = makeApp();
+  
+    const res = await request(app)
+      .delete('/api/auth')
+      .set('Authorization', 'Bearer a.b.sig');
+  
+    expect(res.status).toBe(200);
+    expect(DB.logoutUser).toHaveBeenCalledWith('a.b.sig');
+});
