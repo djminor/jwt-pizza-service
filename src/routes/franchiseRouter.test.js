@@ -172,6 +172,23 @@ test('POST store allowed for franchise admin', async () => {
   
     expect(res.status).toBe(200);
 });
+test('POST store forbidden when not admin or franchise admin', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { id: 3, isRole: () => false };
+      next();
+    });
+  
+    DB.getFranchise.mockResolvedValue({
+      id: 9,
+      admins: [{ id: 99 }],
+    });
+  
+    const res = await request(makeApp())
+      .post('/api/franchise/9/store')
+      .send({});
+  
+    expect(res.status).toBe(403);
+});
   
   
   
