@@ -1,0 +1,59 @@
+const request = require('supertest');
+const express = require('express');
+
+const mockAuth = jest.fn((req, res, next) => {
+  req.user = {
+    id: 1,
+    name: 'u',
+    email: 't@test.com',
+    roles: [{ role: 'admin' }],
+    isRole: (r) => r === 'admin',
+  };
+  next();
+});
+
+const mockSetAuth = jest.fn().mockResolvedValue('token123');
+
+jest.mock('../database/database.js', () => ({
+  Role: { Admin: 'admin' },
+  DB: {
+    updateUser: jest.fn(),
+  },
+}));
+
+jest.mock('./authRouter.js', () => ({
+  authRouter: {
+    authenticateToken: (req, res, next) => mockAuth(req, res, next),
+  },
+  setAuth: (...args) => mockSetAuth(...args),
+}));
+
+jest.mock('../endpointHelper.js', () => ({
+  asyncHandler: (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next),
+}));
+
+const { DB } = require('../database/database.js');
+const userRouter = require('./userRouter.js');
+
+function makeApp() {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/user', userRouter);
+
+  app.use((err, req, res, next) => {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  });
+
+  return app;
+}
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+test('GET /api/user/me returns authenticated user', async () => {
+  const res = await request(makeApp()).get('/api/user/me');
+
+  expect(res.status).toBe(200);
+  expect(res.body.email).toBe('t@test.com');
+});
