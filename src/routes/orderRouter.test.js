@@ -93,4 +93,17 @@ test('PUT /api/order/menu adds item when admin', async () => {
     expect(DB.addMenuItem).toHaveBeenCalledWith({ title: 'New Pizza' });
     expect(DB.getMenu).toHaveBeenCalled();
 });
+test('PUT /api/order/menu rejects non-admin', async () => {
+    mockAuth.mockImplementationOnce((req, res, next) => {
+      req.user = { isRole: () => false };
+      next();
+    });
+  
+    const res = await request(makeApp())
+      .put('/api/order/menu')
+      .send({ title: 'Bad Pizza' });
+  
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/unable to add menu item/);
+});
   
