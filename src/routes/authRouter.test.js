@@ -102,3 +102,10 @@ test('PUT /api/auth login success', async () => {
     expect(DB.getUser).toHaveBeenCalledWith('e', 'p');
     expect(DB.loginUser).toHaveBeenCalled();
 });
+test('DELETE /api/auth unauthorized', async () => {
+    const app = makeApp();
+  
+    const res = await request(app).delete('/api/auth');
+  
+    expect(res.status).toBe(401);
+});
