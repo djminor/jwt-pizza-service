@@ -122,3 +122,17 @@ test('DELETE /api/auth success', async () => {
     expect(res.status).toBe(200);
     expect(DB.logoutUser).toHaveBeenCalledWith('a.b.sig');
 });
+test('setAuthUser sets req.user when valid', async () => {
+    DB.isLoggedIn.mockResolvedValue(true);
+  
+    const req = { headers: { authorization: 'Bearer t.x.sig' } };
+    const res = {};
+    const next = jest.fn();
+  
+    await setAuthUser(req, res, next);
+  
+    expect(req.user).toBeTruthy();
+    expect(req.user.isRole('admin')).toBe(true);
+    expect(next).toHaveBeenCalled();
+});
+ 
