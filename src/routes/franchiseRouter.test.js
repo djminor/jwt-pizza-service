@@ -57,7 +57,7 @@ function makeApp() {
   app.use('/api/franchise', franchiseRouter);
 
   // error handler
-  app.use((err, req, res, next) => {
+  app.use((err, res) => {
     res.status(err.statusCode || 500).json({ error: err.message });
   });
 

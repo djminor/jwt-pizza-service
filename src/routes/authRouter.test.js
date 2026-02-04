@@ -33,7 +33,6 @@ const { DB, Role } = require('../database/database.js');
 
 let authRouter;
 let setAuthUser;
-let setAuth;
 
 function makeApp() {
   const app = express();
@@ -63,7 +62,6 @@ beforeEach(() => {
     const mod = require('./authRouter.js'); // <-- adjust filename if different
     authRouter = mod.authRouter;
     setAuthUser = mod.setAuthUser;
-    setAuth = mod.setAuth;
   });
 });
 test('POST /api/auth success', async () => {

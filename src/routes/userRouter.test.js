@@ -1,7 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 
-const mockAuth = jest.fn((req, res, next) => {
+const mockAuth = jest.fn((req) => {
   req.user = {
     id: 1,
     name: 'u',
@@ -9,7 +9,6 @@ const mockAuth = jest.fn((req, res, next) => {
     roles: [{ role: 'admin' }],
     isRole: (r) => r === 'admin',
   };
-  next();
 });
 
 const mockSetAuth = jest.fn().mockResolvedValue('token123');
@@ -40,7 +39,7 @@ function makeApp() {
   app.use(express.json());
   app.use('/api/user', userRouter);
 
-  app.use((err, req, res, next) => {
+  app.use((err, res) => {
     res.status(err.statusCode || 500).json({ error: err.message });
   });
 
