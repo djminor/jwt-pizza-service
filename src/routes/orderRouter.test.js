@@ -22,7 +22,7 @@ jest.mock('../config.js', () => ({
 }));
 
 // mock auth middleware
-const mockAuth = jest.fn((req, next) => {
+const mockAuth = jest.fn((req, res, next) => {
   req.user = {
     id: 1,
     name: 'Test User',
@@ -61,7 +61,8 @@ function makeApp() {
   app.use(express.json());
   app.use('/api/order', orderRouter);
 
-  app.use((err, res) => {
+  // eslint-disable-next-line no-unused-vars
+  app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ error: err.message });
   });
 

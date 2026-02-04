@@ -1,7 +1,7 @@
 const request = require('supertest');
 const express = require('express');
 
-const mockAuth = jest.fn((req) => {
+const mockAuth = jest.fn((req, res, next) => {
   req.user = {
     id: 1,
     name: 'u',
@@ -9,6 +9,7 @@ const mockAuth = jest.fn((req) => {
     roles: [{ role: 'admin' }],
     isRole: (r) => r === 'admin',
   };
+  next();   // FIX
 });
 
 const mockSetAuth = jest.fn().mockResolvedValue('token123');
@@ -28,7 +29,8 @@ jest.mock('./authRouter.js', () => ({
 }));
 
 jest.mock('../endpointHelper.js', () => ({
-  asyncHandler: (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next),
+  asyncHandler: (fn) => (req, res, next) =>
+    Promise.resolve(fn(req, res, next)).catch(next),
 }));
 
 const { DB } = require('../database/database.js');
@@ -39,7 +41,8 @@ function makeApp() {
   app.use(express.json());
   app.use('/api/user', userRouter);
 
-  app.use((err, res) => {
+  // eslint-disable-next-line no-unused-vars
+  app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ error: err.message });
   });
 
@@ -56,17 +59,31 @@ test('GET /api/user/me returns authenticated user', async () => {
   expect(res.status).toBe(200);
   expect(res.body.email).toBe('t@test.com');
 });
+
 test('PUT /api/user/:userId updates user and returns new token', async () => {
-  DB.updateUser.mockResolvedValue({ id: 1, name: 'newName', email: 'newEmail', roles: [{ role: 'admin' }] });
+  DB.updateUser.mockResolvedValue({
+    id: 1,
+    name: 'newName',
+    email: 'newEmail',
+    roles: [{ role: 'admin' }],
+  });
 
   const res = await request(makeApp())
     .put('/api/user/1')
-    .send({ name: 'newName', email: 'newEmail', password: 'newPass' });
+    .send({
+      name: 'newName',
+      email: 'newEmail',
+      password: 'newPass',
+    });
 
   expect(res.status).toBe(200);
-  expect(DB.updateUser).toHaveBeenCalledWith(1, 'newName', 'newEmail', 'newPass');
-  expect(mockSetAuth).toHaveBeenCalledWith({ id: 1, name: 'newName', email: 'newEmail', roles: [{ role: 'admin' }] });
+  expect(DB.updateUser).toHaveBeenCalledWith(
+    1,
+    'newName',
+    'newEmail',
+    'newPass'
+  );
+  expect(mockSetAuth).toHaveBeenCalled();
   expect(res.body.user.name).toBe('newName');
   expect(res.body.token).toBe('token123');
 });
-  

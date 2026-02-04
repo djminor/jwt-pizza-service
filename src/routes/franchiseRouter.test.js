@@ -57,7 +57,8 @@ function makeApp() {
   app.use('/api/franchise', franchiseRouter);
 
   // error handler
-  app.use((err, res) => {
+  // eslint-disable-next-line no-unused-vars
+  app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({ error: err.message });
   });
 
@@ -202,22 +203,22 @@ test('DELETE store allowed', async () => {
     expect(DB.deleteStore).toHaveBeenCalledWith(4, 6);
 });
 test('DELETE store forbidden', async () => {
-    mockAuth.mockImplementationOnce((req, res, next) => {
-      req.user = { id: 2, isRole: () => false };
-      next();
-    });
-  
-    DB.getFranchise.mockResolvedValue({
-      id: 4,
-      admins: [{ id: 9 }],
-    });
-  
-    const res = await request(makeApp())
-      .delete('/api/franchise/4/store/6');
-  
-    expect(res.status).toBe(403);
+  mockAuth.mockImplementationOnce((req, res, next) => {
+    req.user = { id: 2, isRole: () => false };
+    next();
+  });
+
+  DB.getFranchise.mockResolvedValue({
+    id: 4,
+    admins: [{ id: 9 }],
+  });
+
+  const res = await request(makeApp())
+    .delete('/api/franchise/4/store/6');
+
+  expect(res.status).toBe(403);
 });
-  
+
   
   
   
