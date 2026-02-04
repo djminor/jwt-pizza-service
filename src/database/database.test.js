@@ -45,7 +45,8 @@ let DB;
 
 beforeEach(() => {
   jest.clearAllMocks();
-
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
   executeMock = jest.fn().mockResolvedValue([[]]);
   queryMock = jest.fn().mockResolvedValue([[]]);
 
@@ -69,6 +70,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   await DB.initialized;
+  jest.restoreAllMocks();
 });
 
 test('initializeDatabase creates schema + tables', async () => {

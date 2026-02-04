@@ -57,3 +57,17 @@ test('GET /api/user/me returns authenticated user', async () => {
   expect(res.status).toBe(200);
   expect(res.body.email).toBe('t@test.com');
 });
+test('PUT /api/user/:userId updates user and returns new token', async () => {
+  DB.updateUser.mockResolvedValue({ id: 1, name: 'newName', email: 'newEmail', roles: [{ role: 'admin' }] });
+
+  const res = await request(makeApp())
+    .put('/api/user/1')
+    .send({ name: 'newName', email: 'newEmail', password: 'newPass' });
+
+  expect(res.status).toBe(200);
+  expect(DB.updateUser).toHaveBeenCalledWith(1, 'newName', 'newEmail', 'newPass');
+  expect(mockSetAuth).toHaveBeenCalledWith({ id: 1, name: 'newName', email: 'newEmail', roles: [{ role: 'admin' }] });
+  expect(res.body.user.name).toBe('newName');
+  expect(res.body.token).toBe('token123');
+});
+  
