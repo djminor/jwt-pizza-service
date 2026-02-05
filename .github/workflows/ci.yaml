@@ -72,13 +72,17 @@ jobs:
 
       - name: Update coverage
         run: |
-            # Extract and strip any hidden whitespace or newlines
-            raw_coverage=$(jq -r '.total.lines.pct' coverage/coverage-summary.json)
-            coverage=$(echo $raw_coverage | tr -d '\r\n ')
+            # 1. Extract the number and remove ALL non-numeric/dot characters
+            COVERAGE_VALUE=$(jq -r '.total.lines.pct' coverage/coverage-summary.json | grep -oE '[0-9.]+')
             
-            # Simplified color logic to avoid bc precision issues
-            if (( $(echo "$coverage >= 80" | bc -l) )); then color="green"; else color="red"; fi
+            # 2. Logic for color (Bash integer comparison)
+            # We convert 95.64 to 95 for a simple integer check
+            INT_COVERAGE=${COVERAGE_VALUE%.*}
+            if [ "$INT_COVERAGE" -lt 80 ]; then COLOR="red"; else COLOR="green"; fi
             
-            # Use a single-quote-friendly curl to ensure $ variables are expanded by the shell
-            curl -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=${coverage}%25&color=${color}" \
+            # 3. Log it so you can see it in your Action output
+            echo "Sending Coverage: $COVERAGE_VALUE with Color: $COLOR"
+            
+            # 4. Execute
+            curl -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=${COVERAGE_VALUE}%25&color=${COLOR}" \
                  -H "Authorization: Bearer ${{ secrets.FACTORY_API_KEY }}"
