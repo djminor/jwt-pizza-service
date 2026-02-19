@@ -24,6 +24,7 @@ jest.mock('../database/database.js', () => ({
   DB: {
     updateUser: jest.fn(),
     listUsers: jest.fn(),
+    deleteUser: jest.fn(),
   },
 }));
 
@@ -135,6 +136,22 @@ async function registerUser(service) {
 
   return [registerRes.body.user, registerRes.body.token];
 }
+
+test('DELETE /api/user/:userId deletes the user', async () => {
+  DB.deleteUser = jest.fn().mockResolvedValue(undefined);
+
+  const res = await request(makeApp())
+    .delete('/api/user/3')
+    .set('Authorization', 'Bearer admin-token');
+
+  expect(res.status).toBe(204);
+  expect(DB.deleteUser).toHaveBeenCalledWith(3);
+});
+
+test('DELETE /api/user/:userId returns 401 if unauthorized', async () => {
+  const res = await request(makeApp()).delete('/api/user/3');
+  expect(res.status).toBe(401);
+});
 
 function randomName() {
   return Math.random().toString(36).substring(2, 12);
