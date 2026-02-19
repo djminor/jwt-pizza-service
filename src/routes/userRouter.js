@@ -15,6 +15,23 @@ userRouter.docs = [
     response: { id: 1, name: '常用名字', email: 'a@jwt.com', roles: [{ role: 'admin' }] },
   },
   {
+    method: 'GET',
+    path: '/api/user?page=1&limit=10&name=*',
+    requiresAuth: true,
+    description: 'Gets a list of users',
+    example: `curl -X GET localhost:3000/api/user -H 'Authorization: Bearer tttttt'`,
+    response: {
+      users: [
+        {
+          id: 1,
+          name: '常用名字',
+          email: 'a@jwt.com',
+          roles: [{ role: 'admin' }],
+        },
+      ],
+    },
+  },
+  {
     method: 'PUT',
     path: '/api/user/:userId',
     requiresAuth: true,
@@ -65,7 +82,7 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({ message: 'not implemented', users: [], more: false });
+    res.json({});
   })
 );
 

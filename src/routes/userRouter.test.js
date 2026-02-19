@@ -2,6 +2,11 @@ const request = require('supertest');
 const express = require('express');
 
 const mockAuth = jest.fn((req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ message: 'unauthorized' });
+  }
+  
   req.user = {
     id: 1,
     name: 'u',
@@ -9,7 +14,7 @@ const mockAuth = jest.fn((req, res, next) => {
     roles: [{ role: 'admin' }],
     isRole: (r) => r === 'admin',
   };
-  next();   // FIX
+  next();
 });
 
 const mockSetAuth = jest.fn().mockResolvedValue('token123');
@@ -54,7 +59,9 @@ beforeEach(() => {
 });
 
 test('GET /api/user/me returns authenticated user', async () => {
-  const res = await request(makeApp()).get('/api/user/me');
+  const res = await request(makeApp())
+  .get('/api/user/me')
+  .set('Authorization', 'Bearer dummy-token');;
 
   expect(res.status).toBe(200);
   expect(res.body.email).toBe('t@test.com');
@@ -70,6 +77,7 @@ test('PUT /api/user/:userId updates user and returns new token', async () => {
 
   const res = await request(makeApp())
     .put('/api/user/1')
+    .set('Authorization', 'Bearer dummy-token')
     .send({
       name: 'newName',
       email: 'newEmail',
@@ -87,3 +95,31 @@ test('PUT /api/user/:userId updates user and returns new token', async () => {
   expect(res.body.user.name).toBe('newName');
   expect(res.body.token).toBe('token123');
 });
+
+test('list users unauthorized', async () => {
+  const listUsersRes = await request(makeApp()).get('/api/user');
+  expect(listUsersRes.status).toBe(401);
+});
+
+test('list users', async () => {
+  const listUsersRes = await request(makeApp())
+    .get('/api/user')
+    .set('Authorization', 'Bearer dummy-token'); 
+  expect(listUsersRes.status).toBe(200);
+});
+
+async function registerUser(service) {
+  const testUser = {
+    name: 'pizza diner',
+    email: `${randomName()}@test.com`,
+    password: 'a',
+  };
+  const registerRes = await service.post('/api/auth').send(testUser);
+  registerRes.body.user.password = testUser.password;
+
+  return [registerRes.body.user, registerRes.body.token];
+}
+
+function randomName() {
+  return Math.random().toString(36).substring(2, 12);
+}
