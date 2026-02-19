@@ -23,6 +23,7 @@ jest.mock('../database/database.js', () => ({
   Role: { Admin: 'admin' },
   DB: {
     updateUser: jest.fn(),
+    listUsers: jest.fn(),
   },
 }));
 
@@ -101,11 +102,26 @@ test('list users unauthorized', async () => {
   expect(listUsersRes.status).toBe(401);
 });
 
-test('list users', async () => {
-  const listUsersRes = await request(makeApp())
+test('GET /api/user returns a list of users for admin', async () => {
+  const mockDbUsers = [
+    { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+    { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+  ];
+  
+  DB.listUsers = jest.fn().mockResolvedValue(mockDbUsers);
+
+  const res = await request(makeApp())
     .get('/api/user')
-    .set('Authorization', 'Bearer dummy-token'); 
-  expect(listUsersRes.status).toBe(200);
+    .set('Authorization', 'Bearer admin-token');
+
+  expect(res.status).toBe(200);
+  expect(res.body).toEqual({
+    users: [
+      { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+    ],
+    more: true
+  });
 });
 
 async function registerUser(service) {

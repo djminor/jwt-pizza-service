@@ -19,6 +19,13 @@ class DB {
     }
   }
 
+   async listUsers() {
+    return [
+      { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+    ];
+  }
+
   async addMenuItem(item) {
     const connection = await this.getConnection();
     try {

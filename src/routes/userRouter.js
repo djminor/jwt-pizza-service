@@ -82,7 +82,18 @@ userRouter.get(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    res.json({});
+    if (!req.user.isRole(Role.Admin)) {
+      return res.status(403).json({ 
+        message: 'You do not have permission to view the user list.' 
+      });
+    }
+
+    const users = await DB.listUsers();
+
+    res.json({
+      users: users,
+      more: true
+    });
   })
 );
 
