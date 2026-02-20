@@ -19,11 +19,30 @@ class DB {
     }
   }
 
-   async listUsers() {
-    return [
+   async listUsers({ page = 1, limit = 10, name = '' }) {
+    // users = await this.query(connection, `SELECT id, name, email FROM user LIMIT ${this.getOffset(page, limit)}, ${limit + 1}`);
+    let allUsers = [
       { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
-      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] },
+      { id: 6, name: 'Toby', email: 't@jwt.com', roles: [{ role: 'diner' }] }
     ];
+  
+    if (name) {
+      const search = name.toLowerCase();
+      allUsers = allUsers.filter(u => 
+        u.name.toLowerCase().includes(search)
+      );
+    }
+  
+    const offset = (page - 1) * limit;
+    const paginatedUsers = allUsers.slice(offset, offset + limit);
+    
+    const more = allUsers.length > offset + limit;
+  
+    return {
+      users: paginatedUsers,
+      more: more
+    };
   }
 
   async addMenuItem(item) {

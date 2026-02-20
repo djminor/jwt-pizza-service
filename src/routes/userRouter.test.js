@@ -104,13 +104,16 @@ test('list users unauthorized', async () => {
 });
 
 test('GET /api/user returns a list of users for admin', async () => {
-  const mockDbUsers = [
-    { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
-    { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
-  ];
-  
-  DB.listUsers = jest.fn().mockResolvedValue(mockDbUsers);
+  const mockResult = {
+    users: [
+      { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+    ],
+    more: true
+  };
 
+  DB.listUsers = jest.fn().mockResolvedValue(mockResult); 
+  
   const res = await request(makeApp())
     .get('/api/user')
     .set('Authorization', 'Bearer admin-token');
@@ -123,6 +126,30 @@ test('GET /api/user returns a list of users for admin', async () => {
     ],
     more: true
   });
+});
+
+test('GET /api/user handles pagination correctly', async () => {
+  const mockResult = {
+    users: [
+      { id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+      { id: 5, name: 'Buddy', email: 'b@jwt.com', roles: [{ role: 'admin' }] }
+    ],
+    more: true
+  };
+
+  DB.listUsers = jest.fn().mockResolvedValue(mockResult);
+
+  const res = await request(makeApp())
+    .get('/api/user?page=1&limit=2')
+    .set('Authorization', 'Bearer admin-token');
+
+  expect(res.status).toBe(200);
+  expect(DB.listUsers).toHaveBeenCalledWith(expect.objectContaining({
+    limit: 2,
+    offset: 0
+  }));
+  
+  expect(typeof res.body.more).toBe('boolean');
 });
 
 async function registerUser(service) {

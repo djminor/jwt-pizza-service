@@ -95,12 +95,15 @@ userRouter.get(
       });
     }
 
-    const users = await DB.listUsers();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const name = req.query.name || '';
 
-    res.json({
-      users: users,
-      more: true
-    });
+    const offset = (page - 1) * limit;
+
+    const result = await DB.listUsers({ limit, offset, name });
+
+    res.json(result);
   })
 );
 
