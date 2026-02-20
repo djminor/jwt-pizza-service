@@ -152,6 +152,28 @@ test('GET /api/user handles pagination correctly', async () => {
   expect(typeof res.body.more).toBe('boolean');
 });
 
+test('GET /api/user handles name filtering correctly', async () => {
+  const mockResult = {
+    users: [
+      {id: 3, name: 'Kai Chen', email: 'd@jwt.com', roles: [{ role: 'diner' }] },
+    ],
+    more: true
+  };
+  DB.listUsers = jest.fn().mockResolvedValue(mockResult);
+  const res = await request(makeApp())
+    .get('/api/user?name=Kai')
+    .set('Authorization', 'Bearer admin-token');
+
+  expect(res.status).toBe(200);
+  expect(DB.listUsers).toHaveBeenCalledWith(expect.objectContaining({
+    name: 'Kai'
+  }));
+
+  expect(res.body.users).toEqual([
+    'Kai Chen'
+  ].map(name => expect.objectContaining({ name })));
+});
+
 async function registerUser(service) {
   const testUser = {
     name: 'pizza diner',
