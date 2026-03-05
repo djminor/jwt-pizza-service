@@ -174,18 +174,6 @@ test('GET /api/user handles name filtering correctly', async () => {
   ].map(name => expect.objectContaining({ name })));
 });
 
-async function registerUser(service) {
-  const testUser = {
-    name: 'pizza diner',
-    email: `${randomName()}@test.com`,
-    password: 'a',
-  };
-  const registerRes = await service.post('/api/auth').send(testUser);
-  registerRes.body.user.password = testUser.password;
-
-  return [registerRes.body.user, registerRes.body.token];
-}
-
 test('DELETE /api/user/:userId deletes the user', async () => {
   DB.deleteUser = jest.fn().mockResolvedValue(undefined);
 
