@@ -190,6 +190,3 @@ test('DELETE /api/user/:userId returns 401 if unauthorized', async () => {
   expect(res.status).toBe(401);
 });
 
-function randomName() {
-  return Math.random().toString(36).substring(2, 12);
-}
