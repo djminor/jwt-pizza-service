@@ -1,10 +1,13 @@
 const express = require('express');
 const config = require('../config.js');
+const metrics = require('../metrics.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 
 const orderRouter = express.Router();
+
+app.use(metrics.requestTracker);
 
 orderRouter.docs = [
   {
