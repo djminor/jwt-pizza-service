@@ -16,6 +16,34 @@ function requestTracker(req, res, next) {
   next();
 }
 
+// Function to track order success/failure and latency
+function trackOrderMetrics(success, latency) {
+  const metricName = success ? 'orderSuccess' : 'orderFailure';
+  const metricValue = 1;
+
+  const metric = createMetric(metricName, metricValue, '1', 'sum', 'asInt', {});
+  sendMetricToGrafana([metric]);
+
+  // Optionally track latency as a separate metric
+  const latencyMetric = createMetric('orderLatency', latency, 'ms', 'gauge', 'asDouble', {});
+  sendMetricToGrafana([latencyMetric]);
+}
+
+const os = require('os');
+
+function getCpuUsagePercentage() {
+  const cpuUsage = os.loadavg()[0] / os.cpus().length;
+  return cpuUsage.toFixed(2) * 100;
+}
+
+function getMemoryUsagePercentage() {
+  const totalMemory = os.totalmem();
+  const freeMemory = os.freemem();
+  const usedMemory = totalMemory - freeMemory;
+  const memoryUsage = (usedMemory / totalMemory) * 100;
+  return memoryUsage.toFixed(2);
+}
+
 // This will periodically send metrics to Grafana
 setInterval(() => {
   const metrics = [];
@@ -88,4 +116,4 @@ function sendMetricToGrafana(metrics) {
     });
 }
 
-module.exports = { requestTracker, greetingChanged };
+module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage };
