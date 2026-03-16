@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const app = express();
 const metrics = require('./metrics');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
