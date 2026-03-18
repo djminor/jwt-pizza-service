@@ -6,7 +6,6 @@ let greetingChangedCount = 0;
 
 const requestsByMethod = {};
 let requestsPerMinuteSnapshot = {};
-let minuteWindowStart = Date.now();
 
 setInterval(() => {
   requestsPerMinuteSnapshot = { ...requestsByMethod };
@@ -15,11 +14,6 @@ setInterval(() => {
   });
   minuteWindowStart = Date.now();
 }, 60000);
-
-// Function to track when the greeting is changed
-function greetingChanged() {
-  greetingChangedCount++;
-}
 
 const activeUsers = {};
 const ACTIVE_USER_WINDOW_MS = 5 * 60 * 1000;
