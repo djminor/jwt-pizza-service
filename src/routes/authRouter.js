@@ -4,10 +4,7 @@ const metrics = require('../metrics');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
-
 const authRouter = express.Router();
-
-authRouter.use(metrics.requestTracker);
 
 authRouter.docs = [
   {
@@ -39,7 +36,6 @@ async function setAuthUser(req, res, next) {
   if (token) {
     try {
       if (await DB.isLoggedIn(token)) {
-        // Check the database to make sure the token is valid.
         req.user = jwt.verify(token, config.jwtSecret);
         req.user.isRole = (role) => !!req.user.roles.find((r) => r.role === role);
       }
@@ -64,11 +60,18 @@ authRouter.post(
   asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
+      metrics.trackAuthAttempt(false);
       return res.status(400).json({ message: 'name, email, and password are required' });
     }
-    const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
-    const auth = await setAuth(user);
-    res.json({ user: user, token: auth });
+    try {
+      const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
+      const auth = await setAuth(user);
+      metrics.trackAuthAttempt(true);
+      res.json({ user: user, token: auth });
+    } catch (err) {
+      metrics.trackAuthAttempt(false);
+      throw err;
+    }
   })
 );
 
@@ -76,10 +79,16 @@ authRouter.post(
 authRouter.put(
   '/',
   asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    const user = await DB.getUser(email, password);
-    const auth = await setAuth(user);
-    res.json({ user: user, token: auth });
+    try {
+      const { email, password } = req.body;
+      const user = await DB.getUser(email, password);
+      const auth = await setAuth(user);
+      metrics.trackAuthAttempt(true);
+      res.json({ user: user, token: auth });
+    } catch (err) {
+      metrics.trackAuthAttempt(false);
+      throw err;
+    }
   })
 );
 

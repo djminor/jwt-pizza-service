@@ -21,6 +21,32 @@ function greetingChanged() {
   greetingChangedCount++;
 }
 
+const activeUsers = {};
+const ACTIVE_USER_WINDOW_MS = 5 * 60 * 1000;
+
+function trackActiveUser(req) {
+  const userId = req.user?.id;
+  if (userId) {
+    activeUsers[userId] = Date.now();
+  }
+}
+
+function getActiveUserCount() {
+  const cutoff = Date.now() - ACTIVE_USER_WINDOW_MS;
+  return Object.values(activeUsers).filter(lastSeen => lastSeen >= cutoff).length;
+}
+
+let authSuccessCount = 0;
+let authFailureCount = 0;
+
+function trackAuthAttempt(success) {
+  if (success) {
+    authSuccessCount++;
+  } else {
+    authFailureCount++;
+  }
+}
+
 // Middleware to track requests
 function requestTracker(req, res, next) {
   console.log(`[metrics] ${req.method} ${req.path}`);
@@ -29,6 +55,8 @@ function requestTracker(req, res, next) {
 
   const method = req.method.toUpperCase();
   requestsByMethod[method] = (requestsByMethod[method] || 0) + 1;
+
+  trackActiveUser(req);
 
   next();
 }
@@ -73,11 +101,13 @@ setInterval(() => {
 
   Object.keys(methodCounts).forEach((method) => {
     metrics.push(
-      createMetric('requests_per_minute', methodCounts[method], '1', 'gauge', 'asInt', { method })
+      createMetric('requests_per_minute', methodCounts[method], '1', 'sum', 'asInt', { method })
     );
   });
 
   metrics.push(createMetric('greetingChange', greetingChangedCount, '1', 'sum', 'asInt', {}));
+
+  metrics.push(createMetric('activeUsers', getActiveUserCount(), '1', 'sum', 'asInt', {}));
 
   sendMetricToGrafana(metrics);
 }, 10000);
