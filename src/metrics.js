@@ -4,6 +4,18 @@ const config = require('./config');
 const requests = {};
 let greetingChangedCount = 0;
 
+const requestsByMethod = {};
+let requestsPerMinuteSnapshot = {};
+let minuteWindowStart = Date.now();
+
+setInterval(() => {
+  requestsPerMinuteSnapshot = { ...requestsByMethod };
+  Object.keys(requestsByMethod).forEach((method) => {
+    requestsByMethod[method] = 0;
+  });
+  minuteWindowStart = Date.now();
+}, 60000);
+
 // Function to track when the greeting is changed
 function greetingChanged() {
   greetingChangedCount++;
@@ -11,8 +23,13 @@ function greetingChanged() {
 
 // Middleware to track requests
 function requestTracker(req, res, next) {
+  console.log(`[metrics] ${req.method} ${req.path}`);
   const endpoint = `[${req.method}] ${req.path}`;
   requests[endpoint] = (requests[endpoint] || 0) + 1;
+
+  const method = req.method.toUpperCase();
+  requestsByMethod[method] = (requestsByMethod[method] || 0) + 1;
+
   next();
 }
 
@@ -21,7 +38,6 @@ function trackOrderMetrics(success, latency) {
   console.log("Made it to trackOrderMetrics with success:", success, "and latency:", latency);
   const metricName = success ? 'orderSuccess' : 'orderFailure';
   const metricValue = 1;
-
   const metric = createMetric(metricName, metricValue, '1', 'sum', 'asInt', {});
 
   // Optionally track latency as a separate metric
@@ -46,8 +62,19 @@ function getMemoryUsagePercentage() {
 // This will periodically send metrics to Grafana
 setInterval(() => {
   const metrics = [];
+
   Object.keys(requests).forEach((endpoint) => {
     metrics.push(createMetric('requests', requests[endpoint], '1', 'sum', 'asInt', { endpoint }));
+  });
+  const methodCounts =
+    Object.keys(requestsPerMinuteSnapshot).length > 0
+      ? requestsPerMinuteSnapshot
+      : requestsByMethod;
+
+  Object.keys(methodCounts).forEach((method) => {
+    metrics.push(
+      createMetric('requests_per_minute', methodCounts[method], '1', 'gauge', 'asInt', { method })
+    );
   });
 
   metrics.push(createMetric('greetingChange', greetingChangedCount, '1', 'sum', 'asInt', {}));
@@ -57,7 +84,6 @@ setInterval(() => {
 
 function createMetric(metricName, metricValue, metricUnit, metricType, valueType, attributes) {
   attributes = { ...attributes, source: config.metrics.source };
-
   const metric = {
     name: metricName,
     unit: metricUnit,
@@ -103,7 +129,10 @@ function sendMetricToGrafana(metrics) {
   fetch(`${config.metrics.endpointUrl}`, {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { Authorization: `Basic ${Buffer.from(`${config.metrics.accountId}:${config.metrics.apiKey}`).toString('base64')}`, 'Content-Type': 'application/json' },
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${config.metrics.accountId}:${config.metrics.apiKey}`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    },
   })
     .then((response) => {
       if (!response.ok) {
