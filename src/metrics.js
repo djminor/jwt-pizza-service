@@ -6,14 +6,12 @@ let greetingChangedCount = 0;
 
 const requestsByMethod = {};
 let requestsPerMinuteSnapshot = {};
-let minuteWindowStart = Date.now();
 
 setInterval(() => {
   requestsPerMinuteSnapshot = { ...requestsByMethod };
   Object.keys(requestsByMethod).forEach((method) => {
     requestsByMethod[method] = 0;
   });
-  minuteWindowStart = Date.now();
 }, 60000);
 
 const activeUsers = {};
