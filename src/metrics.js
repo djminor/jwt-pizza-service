@@ -78,19 +78,26 @@ function trackRevenue(items) {
   revenueInWindow += orderTotal;
 }
 
+let serviceLatencyTotal = 0;
+let serviceLatencyCount = 0;
+
 // Middleware to track requests
 function requestTracker(req, res, next) {
-  console.log(`[metrics] ${req.method} ${req.path}`);
-  const endpoint = `[${req.method}] ${req.path}`;
-  requests[endpoint] = (requests[endpoint] || 0) + 1;
-
-  const method = req.method.toUpperCase();
-  requestsByMethod[method] = (requestsByMethod[method] || 0) + 1;
-
-  trackActiveUser(req);
-
-  next();
-}
+    const start = Date.now();
+  
+    res.on('finish', () => {
+      const latency = Date.now() - start;
+      serviceLatencyTotal += latency;
+      serviceLatencyCount++;
+    });
+  
+    const endpoint = `[${req.method}] ${req.path}`;
+    requests[endpoint] = (requests[endpoint] || 0) + 1;
+    const method = req.method.toUpperCase();
+    requestsByMethod[method] = (requestsByMethod[method] || 0) + 1;
+    trackActiveUser(req);
+    next();
+  }
 
 // Function to track order success/failure and latency
 let pizzaLatencyTotal = 0;
@@ -154,6 +161,11 @@ setInterval(() => {
   metrics.push(createMetric('pizzaLatency', avgPizzaLatency, 'ms', 'sum', 'asDouble', {}));
   pizzaLatencyTotal = 0;
   pizzaLatencyCount = 0;
+
+  const avgServiceLatency = serviceLatencyCount > 0 ? serviceLatencyTotal / serviceLatencyCount : 0;
+  metrics.push(createMetric('serviceLatency', avgServiceLatency, 'ms', 'sum', 'asDouble', {}));
+  serviceLatencyTotal = 0;
+  serviceLatencyCount = 0;
 
   sendMetricToGrafana(metrics);
 }, 10000);
