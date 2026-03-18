@@ -1,14 +1,13 @@
 const express = require('express');
 const config = require('../config.js');
 const metrics = require('../metrics.js');
-const app = express();
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 
 const orderRouter = express.Router();
 
-app.use(metrics.requestTracker);
+orderRouter.use(metrics.requestTracker);
 
 orderRouter.docs = [
   {
@@ -81,6 +80,7 @@ orderRouter.post(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
+    const start = Date.now();
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
     const r = await fetch(`${config.factory.url}/api/order`, {
@@ -90,8 +90,10 @@ orderRouter.post(
     });
     const j = await r.json();
     if (r.ok) {
+      metrics.trackOrderMetrics(r.ok, Date.now() - start);
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
+      metrics.trackOrderMetrics(r.ok, Date.now() - start);
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })

@@ -18,15 +18,14 @@ function requestTracker(req, res, next) {
 
 // Function to track order success/failure and latency
 function trackOrderMetrics(success, latency) {
+  console.log("Made it to trackOrderMetrics with success:", success, "and latency:", latency);
   const metricName = success ? 'orderSuccess' : 'orderFailure';
   const metricValue = 1;
 
   const metric = createMetric(metricName, metricValue, '1', 'sum', 'asInt', {});
-  sendMetricToGrafana([metric]);
 
   // Optionally track latency as a separate metric
   const latencyMetric = createMetric('orderLatency', latency, 'ms', 'gauge', 'asDouble', {});
-  sendMetricToGrafana([latencyMetric]);
 }
 
 const os = require('os');
@@ -57,7 +56,7 @@ setInterval(() => {
 }, 10000);
 
 function createMetric(metricName, metricValue, metricUnit, metricType, valueType, attributes) {
-  attributes = { ...attributes, source: config.source };
+  attributes = { ...attributes, source: config.metrics.source };
 
   const metric = {
     name: metricName,
@@ -101,10 +100,10 @@ function sendMetricToGrafana(metrics) {
     ],
   };
 
-  fetch(`${config.endpointUrl}`, {
+  fetch(`${config.metrics.endpointUrl}`, {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { Authorization: `Bearer ${config.accountId}:${config.apiKey}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Basic ${Buffer.from(`${config.metrics.accountId}:${config.metrics.apiKey}`).toString('base64')}`, 'Content-Type': 'application/json' },
   })
     .then((response) => {
       if (!response.ok) {
