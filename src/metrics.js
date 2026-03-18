@@ -93,14 +93,12 @@ function requestTracker(req, res, next) {
 }
 
 // Function to track order success/failure and latency
-function trackOrderMetrics(success, latency) {
-  console.log("Made it to trackOrderMetrics with success:", success, "and latency:", latency);
-  const metricName = success ? 'orderSuccess' : 'orderFailure';
-  const metricValue = 1;
-  const metric = createMetric(metricName, metricValue, '1', 'sum', 'asInt', {});
+let pizzaLatencyTotal = 0;
+let pizzaLatencyCount = 0;
 
-  // Optionally track latency as a separate metric
-  const latencyMetric = createMetric('orderLatency', latency, 'ms', 'gauge', 'asDouble', {});
+function trackLatency(latency) {
+  pizzaLatencyTotal += latency;
+  pizzaLatencyCount++;
 }
 
 const os = require('os');
@@ -151,6 +149,11 @@ setInterval(() => {
   metrics.push(createMetric('pizzaCreationFailure', pizzaCreationFailureCount, '1', 'sum', 'asInt', {}));
 
   metrics.push(createMetric('revenuePerMinute', revenuePerMinuteSnapshot, '₿', 'sum', 'asDouble', {}));
+
+  const avgPizzaLatency = pizzaLatencyCount > 0 ? pizzaLatencyTotal / pizzaLatencyCount : 0;
+  metrics.push(createMetric('pizzaLatency', avgPizzaLatency, 'ms', 'sum', 'asDouble', {}));
+  pizzaLatencyTotal = 0;
+  pizzaLatencyCount = 0;
 
   sendMetricToGrafana(metrics);
 }, 10000);
@@ -217,4 +220,4 @@ function sendMetricToGrafana(metrics) {
     });
 }
 
-module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt, trackPizzasSold, trackPizzaCreationFailure, trackRevenue };
+module.exports = { requestTracker, trackLatency, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt, trackPizzasSold, trackPizzaCreationFailure, trackRevenue };

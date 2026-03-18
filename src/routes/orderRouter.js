@@ -91,11 +91,11 @@ orderRouter.post(
     if (r.ok) {
       metrics.trackPizzasSold(req.body.items.length);
       metrics.trackRevenue(req.body.items);
-      metrics.trackOrderMetrics(r.ok, Date.now() - start);
+      metrics.trackLatency(Date.now() - start);
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
       metrics.trackPizzaCreationFailure();
-      metrics.trackOrderMetrics(r.ok, Date.now() - start);
+      metrics.trackLatency(Date.now() - start);
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })
