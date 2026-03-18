@@ -76,7 +76,7 @@ const os = require('os');
 
 function getCpuUsagePercentage() {
   const cpuUsage = os.loadavg()[0] / os.cpus().length;
-  return cpuUsage.toFixed(2) * 100;
+  return (cpuUsage * 100).toFixed(2);
 }
 
 function getMemoryUsagePercentage() {
@@ -108,6 +108,12 @@ setInterval(() => {
   metrics.push(createMetric('greetingChange', greetingChangedCount, '1', 'sum', 'asInt', {}));
 
   metrics.push(createMetric('activeUsers', getActiveUserCount(), '1', 'sum', 'asInt', {}));
+
+  metrics.push(createMetric('authSuccess', authSuccessCount, '1', 'sum', 'asInt', {}));
+  metrics.push(createMetric('authFailure', authFailureCount, '1', 'sum', 'asInt', {}));
+
+  metrics.push(createMetric('cpu', getCpuUsagePercentage(), '1', 'gauge', 'asDouble', {}));
+  metrics.push(createMetric('memory', getMemoryUsagePercentage(), '1', 'gauge', 'asDouble', {}));
 
   sendMetricToGrafana(metrics);
 }, 10000);
@@ -174,4 +180,4 @@ function sendMetricToGrafana(metrics) {
     });
 }
 
-module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage };
+module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt };
