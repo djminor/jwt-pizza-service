@@ -59,6 +59,12 @@ function trackPizzasSold(count) {
   pizzasSoldInWindow += count;
 }
 
+let pizzaCreationFailureCount = 0;
+
+function trackPizzaCreationFailure() {
+  pizzaCreationFailureCount++;
+}
+
 // Middleware to track requests
 function requestTracker(req, res, next) {
   console.log(`[metrics] ${req.method} ${req.path}`);
@@ -129,6 +135,8 @@ setInterval(() => {
 
   metrics.push(createMetric('pizzasSoldPerMinute', pizzasSoldPerMinuteSnapshot, '1', 'sum', 'asInt', {}));
 
+  metrics.push(createMetric('pizzaCreationFailure', pizzaCreationFailureCount, '1', 'sum', 'asInt', {}));
+
   sendMetricToGrafana(metrics);
 }, 10000);
 
@@ -194,4 +202,4 @@ function sendMetricToGrafana(metrics) {
     });
 }
 
-module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt, trackPizzasSold };
+module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt, trackPizzasSold, trackPizzaCreationFailure };
