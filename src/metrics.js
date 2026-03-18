@@ -6,6 +6,7 @@ let greetingChangedCount = 0;
 
 const requestsByMethod = {};
 let requestsPerMinuteSnapshot = {};
+let minuteWindowStart = Date.now();
 
 setInterval(() => {
   requestsPerMinuteSnapshot = { ...requestsByMethod };
