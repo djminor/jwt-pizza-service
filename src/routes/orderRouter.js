@@ -89,6 +89,7 @@ orderRouter.post(
     });
     const j = await r.json();
     if (r.ok) {
+      metrics.trackPizzasSold(req.body.items.length);
       metrics.trackOrderMetrics(r.ok, Date.now() - start);
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {

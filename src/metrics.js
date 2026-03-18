@@ -47,6 +47,18 @@ function trackAuthAttempt(success) {
   }
 }
 
+let pizzasSoldInWindow = 0;
+let pizzasSoldPerMinuteSnapshot = 0;
+
+setInterval(() => {
+  pizzasSoldPerMinuteSnapshot = pizzasSoldInWindow;
+  pizzasSoldInWindow = 0;
+}, 60000);
+
+function trackPizzasSold(count) {
+  pizzasSoldInWindow += count;
+}
+
 // Middleware to track requests
 function requestTracker(req, res, next) {
   console.log(`[metrics] ${req.method} ${req.path}`);
@@ -115,6 +127,8 @@ setInterval(() => {
   metrics.push(createMetric('cpu', getCpuUsagePercentage(), '1', 'gauge', 'asDouble', {}));
   metrics.push(createMetric('memory', getMemoryUsagePercentage(), '1', 'gauge', 'asDouble', {}));
 
+  metrics.push(createMetric('pizzasSoldPerMinute', pizzasSoldPerMinuteSnapshot, '1', 'sum', 'asInt', {}));
+
   sendMetricToGrafana(metrics);
 }, 10000);
 
@@ -180,4 +194,4 @@ function sendMetricToGrafana(metrics) {
     });
 }
 
-module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt };
+module.exports = { requestTracker, greetingChanged, trackOrderMetrics, getCpuUsagePercentage, getMemoryUsagePercentage, trackAuthAttempt, trackPizzasSold };
