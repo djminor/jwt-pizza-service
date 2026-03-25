@@ -15,6 +15,12 @@ jest.mock('../config.js', () => ({
         connectTimeout: 1000,
       },
     },
+    logging: {
+      source: '',
+      endpointUrl: '',
+      accountId: '',
+      apiKey: '',
+    },
 }));
 jest.mock('../endpointHelper.js', () => ({
   asyncHandler: (fn) => (req, res, next) =>

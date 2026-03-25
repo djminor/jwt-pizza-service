@@ -11,6 +11,12 @@ jest.mock('../database/database.js', () => ({
   Role: {
     Admin: 'admin',
   },
+  logging: {
+    source: '',
+    endpointUrl: '',
+    accountId: '',
+    apiKey: '',
+  },
 }));
 
 // mock config

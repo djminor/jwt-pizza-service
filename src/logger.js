@@ -42,12 +42,11 @@ async function sendToLoki(level, message, meta = {}) {
 
   return new Promise((resolve) => {
     const req = https.request(options, (res) => {
-      res.resume(); // drain the response so the socket closes cleanly
+      res.resume();
       resolve();
     });
-    req.on('error', (err) => {
-      console.error('[logger] Failed to push to Loki:', err.message);
-      resolve(); // never reject — logging must not crash the app
+    req.on('error', () => {
+      resolve();
     });
     req.write(body);
     req.end();
