@@ -14,6 +14,7 @@ const MIN_LEVEL  = LOG_LEVELS[process.env.LOG_LEVEL] ?? LOG_LEVELS.debug;
 const https = require('https');
 
 async function sendToLoki(level, message, meta = {}) {
+  if (!LOGGING_URL) return;
   const nowNs = String(Date.now()) + "000000";
   const body  = JSON.stringify({
     streams: [
