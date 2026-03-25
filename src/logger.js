@@ -1,7 +1,5 @@
 "use strict";
 
-const axios = require("axios");
-
 const config = require("./config");
 
 const LOGGING_URL        = config.logging.endpointUrl;
@@ -13,39 +11,45 @@ const LOKI_PUSH_ENDPOINT = `${LOGGING_URL}/loki/api/v1/push`;
 const LOG_LEVELS = { debug: 0, info: 1, warn: 2, error: 3 };
 const MIN_LEVEL  = LOG_LEVELS[process.env.LOG_LEVEL] ?? LOG_LEVELS.debug;
 
+const https = require('https');
+
 async function sendToLoki(level, message, meta = {}) {
-  const nowNs   = String(Date.now()) + "000000";
-  const payload = {
+  const nowNs = String(Date.now()) + "000000";
+  const body  = JSON.stringify({
     streams: [
       {
-        stream: {
-          app:   config.logging.appName,
-          env:   config.logging.env,
-          level: level,
-        },
-        values: [
-          [
-            nowNs,
-            JSON.stringify({ message, level, ...meta }),
-          ],
-        ],
+        stream: { app: config.logging.appName, env: config.logging.env, level },
+        values: [[nowNs, JSON.stringify({ message, level, ...meta })]],
       },
     ],
-  };
+  });
+
+  const url  = new URL(LOKI_PUSH_ENDPOINT);
+  const auth = Buffer.from(`${LOGGING_ACCOUNT_ID}:${LOGGING_API_KEY}`).toString('base64');
 
   const options = {
-    headers: { "Content-Type": "application/json" },
-    auth: {
-      username: LOGGING_ACCOUNT_ID,
-      password: LOGGING_API_KEY,
+    hostname: url.hostname,
+    path:     url.pathname,
+    method:   'POST',
+    headers: {
+      'Content-Type':   'application/json',
+      'Content-Length': Buffer.byteLength(body),
+      'Authorization':  `Basic ${auth}`,
     },
   };
 
-  try {
-    await axios.post(LOKI_PUSH_ENDPOINT, payload, options);
-  } catch (err) {
-    console.error("[logger] Failed to push to Loki:", err.message);
-  }
+  return new Promise((resolve) => {
+    const req = https.request(options, (res) => {
+      res.resume(); // drain the response so the socket closes cleanly
+      resolve();
+    });
+    req.on('error', (err) => {
+      console.error('[logger] Failed to push to Loki:', err.message);
+      resolve(); // never reject — logging must not crash the app
+    });
+    req.write(body);
+    req.end();
+  });
 }
 
 function log(level, message, meta = {}) {
