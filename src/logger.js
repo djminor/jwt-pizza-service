@@ -15,6 +15,7 @@ const https = require('https');
 
 async function sendToLoki(level, message, meta = {}) {
   if (!LOGGING_URL) return;
+  if (!LOGGING_URL.startsWith('http')) return;
   const nowNs = String(Date.now()) + "000000";
   const body  = JSON.stringify({
     streams: [
