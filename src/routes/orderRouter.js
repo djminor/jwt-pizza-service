@@ -4,8 +4,11 @@ const metrics = require('../metrics.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
+const { requestLogger } = require('../logger.js');
 
 const orderRouter = express.Router();
+
+orderRouter.use(requestLogger);
 
 
 orderRouter.docs = [

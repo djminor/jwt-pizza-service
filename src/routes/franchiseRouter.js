@@ -2,8 +2,10 @@ const express = require('express');
 const { DB, Role } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { StatusCodeError, asyncHandler } = require('../endpointHelper.js');
-
+const { requestLogger } = require('../logger.js');
 const franchiseRouter = express.Router();
+
+franchiseRouter.use(requestLogger);
 
 
 franchiseRouter.docs = [

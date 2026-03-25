@@ -4,6 +4,8 @@ const config = require('../config.js');
 const { StatusCodeError } = require('../endpointHelper.js');
 const { Role } = require('../model/model.js');
 const dbModel = require('./dbModel.js');
+const { logger } = require('../logger.js');
+
 class DB {
   constructor() {
     this.initialized = this.initializeDatabase();
@@ -320,8 +322,18 @@ class DB {
   }
 
   async query(connection, sql, params) {
-    const [results] = await connection.execute(sql, params);
-    return results;
+    const start = Date.now();
+    try {
+      const [results] = await connection.execute(sql, params);
+      const durationMs = Date.now() - start;
+      if (durationMs > 500) {
+        logger.warn('Slow query detected', { sql, durationMs });
+      }
+      return results;
+    } catch (err) {
+      logger.error('Query failed', { sql, error: err.message });
+      throw err;
+    }
   }
 
   async getID(connection, key, value, table) {
@@ -357,13 +369,13 @@ class DB {
       const connection = await this._getConnection(false);
       try {
         const dbExists = await this.checkDatabaseExists(connection);
-        console.log(dbExists ? 'Database exists' : 'Database does not exist, creating it');
+        logger.info(dbExists ? 'Database exists' : 'Database does not exist, creating it');
 
         await connection.query(`CREATE DATABASE IF NOT EXISTS ${config.db.connection.database}`);
         await connection.query(`USE ${config.db.connection.database}`);
 
         if (!dbExists) {
-          console.log('Successfully created database');
+          logger.info('Successfully created database');
         }
 
         for (const statement of dbModel.tableCreateStatements) {
@@ -378,7 +390,7 @@ class DB {
         connection.end();
       }
     } catch (err) {
-      console.error(JSON.stringify({ message: 'Error initializing database', exception: err.message, connection: config.db.connection }));
+      logger.error(JSON.stringify({ message: 'Error initializing database', exception: err.message, connection: config.db.connection }));
     }
   }
 
