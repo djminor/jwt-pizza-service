@@ -11,12 +11,6 @@ jest.mock('../database/database.js', () => ({
   Role: {
     Admin: 'admin',
   },
-  logging: {
-    source: '',
-    endpointUrl: '',
-    accountId: '',
-    apiKey: '',
-  },
 }));
 
 // mock config
@@ -24,6 +18,12 @@ jest.mock('../config.js', () => ({
   factory: {
     url: 'http://factory.test',
     apiKey: 'factory-key',
+  },
+  logging: {
+    source: '',
+    endpointUrl: '',
+    accountId: '',
+    apiKey: '',
   },
 }));
 
