@@ -2,9 +2,9 @@
 
 const config = require("./config");
 
-const LOGGING_URL        = config.logging.endpointUrl;
-const LOGGING_ACCOUNT_ID = config.logging.accountId;
-const LOGGING_API_KEY    = config.logging.apiKey;
+const LOGGING_URL        = config.logging.endpointUrl || '';
+const LOGGING_ACCOUNT_ID = config.logging.accountId || '';
+const LOGGING_API_KEY    = config.logging.apiKey || '';
 
 const LOKI_PUSH_ENDPOINT = `${LOGGING_URL}/loki/api/v1/push`;
 
