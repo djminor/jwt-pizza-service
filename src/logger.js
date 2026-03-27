@@ -6,7 +6,7 @@ const LOGGING_URL        = config.logging.endpointUrl || '';
 const LOGGING_ACCOUNT_ID = config.logging.accountId || '';
 const LOGGING_API_KEY    = config.logging.apiKey || '';
 
-const LOKI_PUSH_ENDPOINT = `${LOGGING_URL}/loki/api/v1/push`;
+const LOKI_PUSH_ENDPOINT = `${LOGGING_URL}`;
 
 const LOG_LEVELS = { debug: 0, info: 1, warn: 2, error: 3 };
 const MIN_LEVEL  = LOG_LEVELS[process.env.LOG_LEVEL] ?? LOG_LEVELS.debug;
