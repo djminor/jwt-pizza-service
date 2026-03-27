@@ -20,7 +20,7 @@ async function sendToLoki(level, message, meta = {}) {
   const body  = JSON.stringify({
     streams: [
       {
-        stream: { app: config.logging.appName, env: config.logging.env, level },
+        stream: { app: config.logging.source, env: config.logging.env, level },
         values: [[nowNs, JSON.stringify({ message, level, ...meta })]],
       },
     ],
@@ -60,8 +60,8 @@ function log(level, message, meta = {}) {
     timestamp: new Date().toISOString(),
     level,
     message,
-    app: config.logging.appName,
-    env: config.logging.env,
+    app: config.logging.source,
+    env: 'production',
     ...meta,
   };
 
