@@ -56,15 +56,6 @@ async function sendToLoki(level, message, meta = {}) {
 function log(level, message, meta = {}) {
   if (LOG_LEVELS[level] < MIN_LEVEL) return;
 
-  const entry = {
-    timestamp: new Date().toISOString(),
-    level,
-    message,
-    app: config.logging.source,
-    env: 'production',
-    ...meta,
-  };
-
   sendToLoki(level, message, meta);
 }
 
