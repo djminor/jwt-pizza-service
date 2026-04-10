@@ -180,13 +180,23 @@ class DB {
   async addDinerOrder(user, order) {
     const connection = await this.getConnection();
     try {
-      const orderResult = await this.query(connection, `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())`, [user.id, order.franchiseId, order.storeId]);
+      const orderResult = await this.query(connection,
+        `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())`,
+        [user.id, order.franchiseId, order.storeId]);
       const orderId = orderResult.insertId;
+      const savedItems = [];
       for (const item of order.items) {
-        const menuId = await this.getID(connection, 'id', item.menuId, 'menu');
-        await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuId, item.description, item.price]);
+        const menuItems = await this.query(connection, `SELECT id, price FROM menu WHERE id=?`, [item.menuId]);
+        if (menuItems.length === 0) {
+          throw new StatusCodeError('invalid menu item', 400);
+        }
+        const menuItem = menuItems[0];
+        await this.query(connection,
+          `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`,
+          [orderId, menuItem.id, item.description, menuItem.price]);
+        savedItems.push({ ...item, price: menuItem.price });
       }
-      return { ...order, id: orderId };
+      return { ...order, items: savedItems, id: orderId };
     } finally {
       connection.end();
     }
