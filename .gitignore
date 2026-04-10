@@ -5,3 +5,5 @@ config.js
 coverage
 dist
 selfAttacks.md
+scripts/*
+.env

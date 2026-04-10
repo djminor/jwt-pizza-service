@@ -65,13 +65,6 @@ function log(level, message, meta = {}) {
     ...meta,
   };
 
-  const output = JSON.stringify(entry);
-  if (level === "error") {
-    console.error(output);
-  } else {
-    console.log(output);
-  }
-
   sendToLoki(level, message, meta);
 }
 
