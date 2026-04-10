@@ -49,6 +49,17 @@ async function setAuthUser(req, res, next) {
   next();
 }
 
+const rateLimit = require('express-rate-limit');
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per window
+  message: { message: 'Too many attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
@@ -60,6 +71,7 @@ authRouter.authenticateToken = (req, res, next) => {
 // register
 authRouter.post(
   '/',
+  authLimiter,
   asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -81,6 +93,7 @@ authRouter.post(
 // login
 authRouter.put(
   '/',
+  authLimiter,
   asyncHandler(async (req, res) => {
     try {
       const { email, password } = req.body;
