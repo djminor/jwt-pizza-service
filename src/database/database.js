@@ -403,11 +403,6 @@ class DB {
         for (const statement of dbModel.tableCreateStatements) {
           await connection.query(statement);
         }
-
-        if (!dbExists) {
-          const defaultAdmin = { name: '常用名字', email: 'a@jwt.com', password: 'admin', roles: [{ role: Role.Admin }] };
-          this.addUser(defaultAdmin);
-        }
       } finally {
         connection.end();
       }
