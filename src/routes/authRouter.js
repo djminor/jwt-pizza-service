@@ -68,24 +68,6 @@ authRouter.authenticateToken = (req, res, next) => {
   next();
 };
 
-// TEMPORARY - REMOVE BEFORE FINAL DEPLOY
-authRouter.post(
-  '/bootstrap',
-  asyncHandler(async (req, res) => {
-    if (req.headers['x-bootstrap-secret'] !== 'delete-me-after-use') {
-      return res.status(403).json({ message: 'unauthorized' });
-    }
-    const { name, email, password } = req.body;
-    const user = await DB.addUser({
-      name,
-      email,
-      password,
-      roles: [{ role: Role.Admin }]
-    });
-    res.json({ user });
-  })
-);
-
 // register
 authRouter.post(
   '/',
