@@ -4,5 +4,6 @@ FROM node:${NODE_VERSION}-alpine
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
+ENV NODE_ENV=production
 EXPOSE 80
 CMD ["node", "index.js", "80"]
